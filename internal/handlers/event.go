@@ -107,7 +107,10 @@ func (h *EventHandler) ListEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(events)
+	w.WriteHeader(http.StatusOK)
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(events)
 }
 
 func (h *EventHandler) DeleteEvent(w http.ResponseWriter, r *http.Request) {

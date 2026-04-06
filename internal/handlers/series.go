@@ -143,7 +143,10 @@ func (h *SeriesHandler) ListSeries(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(series)
+	w.WriteHeader(http.StatusOK)
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(series)
 }
 
 func (h *SeriesHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
