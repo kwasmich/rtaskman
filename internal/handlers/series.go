@@ -161,7 +161,7 @@ func (h *SeriesHandler) DeleteSeries(w http.ResponseWriter, r *http.Request) {
 
 	_, err = h.db.Exec(
 		context.Background(),
-		`UPDATE series SET deleted_at = NOW(), deleted_by = $1 WHERE id = $2`,
+		`UPDATE series SET deleted_at = COALESCE(deleted_at, NOW()), deleted_by = COALESCE(deleted_by, $1) WHERE id = $2`,
 		deletedBy,
 		seriesID,
 	)
