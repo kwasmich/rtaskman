@@ -17,13 +17,31 @@ import (
 	"kwasi-ich.de/rtaskman/internal/handlers"
 )
 
+func Ping(ctx context.Context, db *pgxpool.Pool) error {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	return db.Ping(ctx)
+}
+
 func main() {
 	// Initialize database connection
-	db, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	dbConnectionString := os.Getenv("DATABASE_URL")
+	if dbConnectionString == "" {
+		log.Fatal("DATABASE_URL environment variable is required")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	db, err := pgxpool.New(ctx, dbConnectionString)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
+
+	if err := Ping(ctx, db); err != nil {
+		log.Fatalf("failed to ping db: %v", err)
+	}
 
 	// Initialize routers
 	r := chi.NewRouter()
@@ -76,5 +94,5 @@ func main() {
 	log.Println("Server started on :8087")
 	<-done
 	log.Println("Server shutting down...")
-	srv.Shutdown(context.Background())
+	srv.Shutdown(ctx)
 }
