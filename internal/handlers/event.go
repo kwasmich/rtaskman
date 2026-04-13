@@ -83,7 +83,7 @@ func (h *EventHandler) ListEvents(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.db.Query(
 		context.Background(),
-		`SELECT id, created_at, created_by, meta, created_at - LAG(created_at) OVER (ORDER BY created_at) AS time_diff 
+		`SELECT id, created_at, created_by, meta, (created_at - LAG(created_at) OVER (ORDER BY created_at))::text AS time_diff 
 		FROM event WHERE series_id = $1`,
 		seriesID,
 	)

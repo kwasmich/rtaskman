@@ -4,6 +4,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -41,7 +42,7 @@ type SeriesResponse struct {
 	TagList        []string         `json:"tag_list,omitempty"`
 	TargetInterval *string          `json:"target_interval,omitempty"`
 	Meta           *json.RawMessage `json:"meta,omitempty"`
-	TimeDiff       *string          `json:"time_diff,omitempty"`
+	TimeDiff       []*string        `json:"time_diff,omitempty"`
 }
 
 func (h *SeriesHandler) CreateSeries(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +108,7 @@ func (h *SeriesHandler) ListSeries(w http.ResponseWriter, r *http.Request) {
 
 	rows, err := h.db.Query(
 		context.Background(),
-		`SELECT id, room_id, created_at, created_by, name, description, color, tag_list, target_interval, meta, time_diffs 
+		`SELECT id, room_id, created_at, created_by, name, description, color, tag_list, target_interval, meta, time_diffs
 		FROM active_series WHERE room_id = $1`,
 		roomID,
 	)
@@ -120,7 +121,6 @@ func (h *SeriesHandler) ListSeries(w http.ResponseWriter, r *http.Request) {
 	var series []SeriesResponse
 	for rows.Next() {
 		var s SeriesResponse
-		var timeDiff *string
 		err := rows.Scan(
 			&s.ID,
 			&s.RoomID,
@@ -132,13 +132,13 @@ func (h *SeriesHandler) ListSeries(w http.ResponseWriter, r *http.Request) {
 			&s.TagList,
 			&s.TargetInterval,
 			&s.Meta,
-			&timeDiff,
+			&s.TimeDiff,
 		)
 		if err != nil {
+			log.Println("Error scanning series:", err)
 			http.Error(w, "Failed to scan series", http.StatusInternalServerError)
 			return
 		}
-		s.TimeDiff = timeDiff
 		series = append(series, s)
 	}
 
