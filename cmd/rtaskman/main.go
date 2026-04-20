@@ -35,10 +35,6 @@ func initDB(ctx context.Context, db *pgxpool.Pool) error {
 			deleted_at TIMESTAMPTZ
 		);
 
-		CREATE OR REPLACE VIEW active_room AS
-		SELECT id FROM room
-		WHERE deleted_at IS NULL;
-		
 		CREATE TABLE IF NOT EXISTS series (
 			id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 			room_id uuid REFERENCES room(id) ON DELETE CASCADE,
@@ -54,6 +50,18 @@ func initDB(ctx context.Context, db *pgxpool.Pool) error {
 			deleted_at TIMESTAMPTZ,
 			deleted_by TEXT
 		);
+
+		CREATE TABLE IF NOT EXISTS event (
+			id SERIAL PRIMARY KEY,
+			series_id uuid REFERENCES series(id) ON DELETE CASCADE,
+			created_by TEXT NOT NULL,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			meta JSON
+		);
+
+		CREATE OR REPLACE VIEW active_room AS
+		SELECT id FROM room
+		WHERE deleted_at IS NULL;
 
 		CREATE OR REPLACE VIEW active_series AS
 		SELECT
@@ -87,14 +95,6 @@ func initDB(ctx context.Context, db *pgxpool.Pool) error {
 			) x
 		) e ON TRUE
 		WHERE s.deleted_at IS NULL;
-
-		CREATE TABLE IF NOT EXISTS event (
-			id SERIAL PRIMARY KEY,
-			series_id uuid REFERENCES series(id) ON DELETE CASCADE,
-			created_by TEXT NOT NULL,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-			meta JSON
-		);
 		`
 
 	_, err := db.Exec(ctx, query)
