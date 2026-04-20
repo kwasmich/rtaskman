@@ -4,10 +4,8 @@ WORKDIR /src
 
 RUN apk add --no-cache ca-certificates
 
-COPY go.mod go.sum ./
-# COPY go.mod ./
-# # create go.sum
-# RUN go mod tidy
+COPY go.mod ./
+RUN go mod tidy
 RUN go mod download
 
 COPY . .
