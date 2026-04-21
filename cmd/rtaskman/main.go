@@ -19,12 +19,6 @@ import (
 	"kwasi-ich.de/rtaskman/internal/handlers"
 )
 
-// func Ping(ctx context.Context, db *pgxpool.Pool) error {
-// 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
-// 	defer cancel()
-// 	return db.Ping(ctx)
-// }
-
 func initDB(ctx context.Context, db *pgxpool.Pool) error {
 	query := `
 		CREATE TABLE IF NOT EXISTS room (
@@ -128,7 +122,7 @@ func main() {
 	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
 		log.Println("Successfully connected to Database")
 
-		// Register custom type mapping for timestamptz to ensure UTC output
+		// Register custom type mapping for timestamptz to ensure output in UTC
 		typeMap := conn.TypeMap()
 		typeMap.RegisterType(&pgtype.Type{
 			Name:  "timestamptz",
