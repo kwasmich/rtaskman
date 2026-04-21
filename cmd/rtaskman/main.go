@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"kwasi-ich.de/rtaskman/internal/handlers"
@@ -83,7 +84,7 @@ func initDB(ctx context.Context, db *pgxpool.Pool) error {
 		FROM series s
 		LEFT JOIN LATERAL (
 			SELECT
-				array_agg(EXTRACT(EPOCH FROM x.time_diff)) AS time_diffs,
+				array_agg(trunc(EXTRACT(EPOCH FROM x.time_diff) * 1000)) AS time_diffs,
 				MAX(x.created_at) AS last_date,
 				PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY x.time_diff) AS median_diff
 			FROM (
@@ -126,6 +127,15 @@ func main() {
 
 	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
 		log.Println("Successfully connected to Database")
+
+		// Register custom type mapping for timestamptz to ensure UTC output
+		typeMap := conn.TypeMap()
+		typeMap.RegisterType(&pgtype.Type{
+			Name:  "timestamptz",
+			OID:   pgtype.TimestamptzOID,
+			Codec: &pgtype.TimestamptzCodec{ScanLocation: time.UTC},
+		})
+
 		return nil
 	}
 
