@@ -106,7 +106,7 @@ type SeriesResponse struct {
 	TagList        []string         `json:"tag_list,omitempty"`
 	TargetInterval *string          `json:"target_interval,omitempty"`
 	Meta           *json.RawMessage `json:"meta,omitempty"`
-	TimeDiffs      []float64        `json:"time_diffs,omitempty"`
+	TimeDiffs      []*float64       `json:"time_diffs,omitempty"`
 	MedianDiff     *string          `json:"median_diff,omitempty"`
 	LastDate       *time.Time       `json:"last_date,omitempty"`
 	NextTargetDate *time.Time       `json:"next_target_date,omitempty"`
