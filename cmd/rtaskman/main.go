@@ -21,6 +21,8 @@ import (
 
 func initDB(ctx context.Context, db *pgxpool.Pool) error {
 	query := `
+		ALTER DATABASE postgres SET intervalstyle TO 'iso_8601';
+
 		CREATE TABLE IF NOT EXISTS room (
 			id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 			created_by TEXT NOT NULL,
