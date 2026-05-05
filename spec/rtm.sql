@@ -1,4 +1,5 @@
-ALTER DATABASE app_db SET intervalstyle TO 'iso_8601';
+-- SHOW intervalstyle;
+-- ALTER DATABASE app_db SET intervalstyle TO 'iso_8601';
 
 
 
